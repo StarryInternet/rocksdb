@@ -515,12 +515,13 @@ rocksdb_t* rocksdb_open_for_read_only(
 }
 
 rocksdb_backup_engine_t* rocksdb_backup_engine_open(
-    const rocksdb_options_t* options, const char* path, char** errptr) {
+    const rocksdb_options_t* options, const char* path, int share_table_files,
+    char** errptr) {
   BackupEngine* be;
   if (SaveError(errptr, BackupEngine::Open(options->rep.env,
                                            BackupableDBOptions(path,
                                                                nullptr,
-                                                               true,
+                                                               share_table_files,
                                                                options->rep.info_log.get()),
                                            &be))) {
     return nullptr;
@@ -531,14 +532,30 @@ rocksdb_backup_engine_t* rocksdb_backup_engine_open(
 }
 
 void rocksdb_backup_engine_create_new_backup(rocksdb_backup_engine_t* be,
-                                             rocksdb_t* db, char** errptr) {
-  SaveError(errptr, be->rep->CreateNewBackup(db->rep));
+                                             rocksdb_t* db,
+                                             int flush_before_backup,
+                                             char** errptr) {
+  SaveError(errptr, be->rep->CreateNewBackup(db->rep, flush_before_backup));
+}
+
+void rocksdb_backup_engine_create_new_backup_with_metadata(
+    rocksdb_backup_engine_t* be, rocksdb_t* db, const char* app_metadata,
+    int flush_before_backup, char** errptr) {
+  SaveError(errptr,
+            be->rep->CreateNewBackupWithMetadata(db->rep,
+                                                 std::string(app_metadata),
+                                                 flush_before_backup));
 }
 
 void rocksdb_backup_engine_purge_old_backups(rocksdb_backup_engine_t* be,
                                              uint32_t num_backups_to_keep,
                                              char** errptr) {
   SaveError(errptr, be->rep->PurgeOldBackups(num_backups_to_keep));
+}
+
+void rocksdb_backup_engine_delete_backup(
+    rocksdb_backup_engine_t* be, uint32_t backup_id, char** errptr) {
+  SaveError(errptr, be->rep->DeleteBackup(backup_id));
 }
 
 rocksdb_restore_options_t* rocksdb_restore_options_create() {
@@ -552,6 +569,16 @@ void rocksdb_restore_options_destroy(rocksdb_restore_options_t* opt) {
 void rocksdb_restore_options_set_keep_log_files(rocksdb_restore_options_t* opt,
                                                 int v) {
   opt->rep.keep_log_files = v;
+}
+
+void rocksdb_backup_engine_restore_db_from_backup(
+    rocksdb_backup_engine_t* be, uint32_t backup_id, const char* db_dir,
+    const char* wal_dir, const rocksdb_restore_options_t* restore_options,
+    char** errptr) {
+  SaveError(errptr, be->rep->RestoreDBFromBackup(backup_id,
+                                                 std::string(db_dir),
+                                                 std::string(wal_dir),
+                                                 restore_options->rep));
 }
 
 void rocksdb_backup_engine_restore_db_from_latest_backup(
@@ -591,6 +618,11 @@ uint64_t rocksdb_backup_engine_info_size(
 uint32_t rocksdb_backup_engine_info_number_files(
     const rocksdb_backup_engine_info_t* info, int index) {
   return info->rep[index].number_files;
+}
+
+const char* rocksdb_backup_engine_info_metadata(
+    const rocksdb_backup_engine_info_t* info, int index) {
+  return info->rep[index].app_metadata.c_str();
 }
 
 void rocksdb_backup_engine_info_destroy(

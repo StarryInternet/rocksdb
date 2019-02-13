@@ -140,13 +140,23 @@ extern ROCKSDB_LIBRARY_API rocksdb_t* rocksdb_open_for_read_only(
     unsigned char error_if_log_file_exist, char** errptr);
 
 extern ROCKSDB_LIBRARY_API rocksdb_backup_engine_t* rocksdb_backup_engine_open(
-    const rocksdb_options_t* options, const char* path, char** errptr);
+    const rocksdb_options_t* options, const char* path,
+    int share_table_files, char** errptr);
 
 extern ROCKSDB_LIBRARY_API void rocksdb_backup_engine_create_new_backup(
-    rocksdb_backup_engine_t* be, rocksdb_t* db, char** errptr);
+    rocksdb_backup_engine_t* be, rocksdb_t* db, int flush_before_backup,
+    char** errptr);
+
+extern ROCKSDB_LIBRARY_API void
+rocksdb_backup_engine_create_new_backup_with_metadata(
+    rocksdb_backup_engine_t* be, rocksdb_t* db, const char* app_metadata,
+    int flush_before_backup, char** errptr);
 
 extern ROCKSDB_LIBRARY_API void rocksdb_backup_engine_purge_old_backups(
     rocksdb_backup_engine_t* be, uint32_t num_backups_to_keep, char** errptr);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_backup_engine_delete_backup(
+    rocksdb_backup_engine_t* be, uint32_t backup_id, char** errptr);
 
 extern ROCKSDB_LIBRARY_API rocksdb_restore_options_t*
 rocksdb_restore_options_create();
@@ -154,6 +164,12 @@ extern ROCKSDB_LIBRARY_API void rocksdb_restore_options_destroy(
     rocksdb_restore_options_t* opt);
 extern ROCKSDB_LIBRARY_API void rocksdb_restore_options_set_keep_log_files(
     rocksdb_restore_options_t* opt, int v);
+
+extern ROCKSDB_LIBRARY_API void
+rocksdb_backup_engine_restore_db_from_backup(
+    rocksdb_backup_engine_t* be, uint32_t backup_id, const char* db_dir,
+    const char* wal_dir, const rocksdb_restore_options_t* restore_options,
+    char** errptr);
 
 extern ROCKSDB_LIBRARY_API void
 rocksdb_backup_engine_restore_db_from_latest_backup(
@@ -179,6 +195,9 @@ rocksdb_backup_engine_info_size(const rocksdb_backup_engine_info_t* info,
                                 int index);
 
 extern ROCKSDB_LIBRARY_API uint32_t rocksdb_backup_engine_info_number_files(
+    const rocksdb_backup_engine_info_t* info, int index);
+
+extern ROCKSDB_LIBRARY_API const char* rocksdb_backup_engine_info_metadata(
     const rocksdb_backup_engine_info_t* info, int index);
 
 extern ROCKSDB_LIBRARY_API void rocksdb_backup_engine_info_destroy(
