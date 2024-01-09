@@ -705,6 +705,11 @@ uint32_t rocksdb_backup_engine_info_number_files(
   return info->rep[index].number_files;
 }
 
+const char* rocksdb_backup_engine_info_metadata(
+    const rocksdb_backup_engine_info_t* info, int index) {
+  return info->rep[index].app_metadata.c_str();
+}
+
 void rocksdb_backup_engine_info_destroy(
     const rocksdb_backup_engine_info_t* info) {
   delete info;

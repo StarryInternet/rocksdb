@@ -214,6 +214,9 @@ extern ROCKSDB_LIBRARY_API uint64_t rocksdb_backup_engine_info_size(
 extern ROCKSDB_LIBRARY_API uint32_t rocksdb_backup_engine_info_number_files(
     const rocksdb_backup_engine_info_t* info, int index);
 
+extern ROCKSDB_LIBRARY_API const char* rocksdb_backup_engine_info_metadata(
+    const rocksdb_backup_engine_info_t* info, int index);
+
 extern ROCKSDB_LIBRARY_API void rocksdb_backup_engine_info_destroy(
     const rocksdb_backup_engine_info_t* info);
 
