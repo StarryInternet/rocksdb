@@ -624,6 +624,15 @@ void rocksdb_backup_engine_create_new_backup_flush(
   SaveError(errptr, be->rep->CreateNewBackup(db->rep, flush_before_backup));
 }
 
+
+void rocksdb_backup_engine_create_new_backup_with_metadata(
+    rocksdb_backup_engine_t* be, rocksdb_t* db, const char* app_metadata,
+    unsigned char flush_before_backup, char** errptr) {
+  SaveError(errptr,
+            be->rep->CreateNewBackupWithMetadata(
+            db->rep, std::string(app_metadata), flush_before_backup));
+}
+
 void rocksdb_backup_engine_purge_old_backups(rocksdb_backup_engine_t* be,
                                              uint32_t num_backups_to_keep,
                                              char** errptr) {
