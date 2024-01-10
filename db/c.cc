@@ -624,6 +624,10 @@ void rocksdb_backup_engine_create_new_backup_flush(
   SaveError(errptr, be->rep->CreateNewBackup(db->rep, flush_before_backup));
 }
 
+void rocksdb_backup_engine_delete_backup(
+    rocksdb_backup_engine_t* be, uint32_t backup_id, char** errptr) {
+  SaveError(errptr, be->rep->DeleteBackup(backup_id));
+}
 
 void rocksdb_backup_engine_create_new_backup_with_metadata(
     rocksdb_backup_engine_t* be, rocksdb_t* db, const char* app_metadata,
