@@ -20,6 +20,7 @@
 #ifndef STORAGE_ROCKSDB_INCLUDE_FILTER_POLICY_H_
 #define STORAGE_ROCKSDB_INCLUDE_FILTER_POLICY_H_
 
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <stdlib.h>
